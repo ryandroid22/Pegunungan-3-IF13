@@ -187,6 +187,109 @@ void Initialize()
 
 // permukaan render disini bro
 
+
+void Render()
+{
+	radians =  float(PI*(angle-90.0f)/180.0f);
+
+	
+	cameraX = lookX + sin(radians)*mouseY;	
+	cameraZ = lookZ + cos(radians)*mouseY; 
+	cameraY = lookY + mouseY / 2.0f;
+
+	
+	lookX = (MAP_X*MAP_SCALE)/2.0f;
+	lookY = 150.0f;
+	lookZ = -(MAP_Z*MAP_SCALE)/2.0f;
+
+	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
+	glLoadIdentity();
+
+	
+	gluLookAt(cameraX, cameraY, cameraZ, lookX, lookY, lookZ, 0.0, 1.0, 0.0);
+
+	
+	glBindTexture(GL_TEXTURE_2D, land);
+
+	
+	for (int z = 0; z < MAP_Z-1; z++)
+	{
+		glBegin(GL_TRIANGLE_STRIP);
+		
+		for (int x = 0; x < MAP_X-1; x++)
+		{
+			
+		
+			
+			glColor3f(terrain[x][z][1]/255.0f, terrain[x][z][1]/255.0f, terrain[x][z][1]/255.0f);
+			glTexCoord2f(0.0f, 0.0f);
+			glVertex3f(terrain[x][z][0], terrain[x][z][1], terrain[x][z][2]);
+
+			
+			glTexCoord2f(1.0f, 0.0f);
+			glColor3f(terrain[x+1][z][1]/255.0f, terrain[x+1][z][1]/255.0f, terrain[x+1][z][1]/255.0f);
+			glVertex3f(terrain[x+1][z][0], terrain[x+1][z][1], terrain[x+1][z][2]);
+
+			
+			glTexCoord2f(0.0f, 1.0f);
+			glColor3f(terrain[x][z+1][1]/255.0f, terrain[x][z+1][1]/255.0f, terrain[x][z+1][1]/255.0f);
+			glVertex3f(terrain[x][z+1][0], terrain[x][z+1][1], terrain[x][z+1][2]);
+
+			
+			glColor3f(terrain[x+1][z+1][1]/255.0f, terrain[x+1][z+1][1]/255.0f, terrain[x+1][z+1][1]/255.0f);
+			glTexCoord2f(1.0f, 1.0f);
+			glVertex3f(terrain[x+1][z+1][0], terrain[x+1][z+1][1], terrain[x+1][z+1][2]);
+		}
+		glEnd();
+	}
+	
+	glEnable(GL_BLEND);
+
+	
+	glDepthMask(GL_FALSE);
+
+	
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+	glColor4f(0.5f, 0.5f, 1.0f, 0.7f);			
+	glBindTexture(GL_TEXTURE_2D, water);		
+	
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 0.0f);				
+		glVertex3f(terrain[0][0][0], waterHeight, terrain[0][0][2]);
+
+		glTexCoord2f(10.0f, 0.0f);			
+		glVertex3f(terrain[MAP_X-1][0][0], waterHeight, terrain[MAP_X-1][0][2]);
+
+		glTexCoord2f(10.0f, 10.0f);				
+		glVertex3f(terrain[MAP_X-1][MAP_Z-1][0], waterHeight, terrain[MAP_X-1][MAP_Z-1][2]);
+
+		glTexCoord2f(0.0f, 10.0f);				
+		glVertex3f(terrain[0][MAP_Z-1][0],waterHeight, terrain[0][MAP_Z-1][2]);
+	glEnd();
+
+	
+	glDepthMask(GL_TRUE);
+
+	
+	glDisable(GL_BLEND);
+
+	
+	if (waterHeight > 155.0f)
+		waterDir = false;
+	else if (waterHeight < 154.0f)
+		waterDir = true;
+
+	if (waterDir)
+		waterHeight += 0.01f;
+	else
+		waterHeight -= 0.01f;
+
+	glFlush();
+	SwapBuffers(g_HDC);			
+}
+
 //============================
 
 
