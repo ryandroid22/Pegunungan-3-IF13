@@ -185,8 +185,6 @@ void Initialize()
 
 
 
-// permukaan render disini bro
-
 
 void Render()
 {
@@ -290,12 +288,131 @@ void Render()
 	SwapBuffers(g_HDC);			
 }
 
-//============================
+
+void SetupPixelFormat(HDC hDC)
+{
+	int nPixelFormat;					
+
+	static PIXELFORMATDESCRIPTOR pfd = {
+		sizeof(PIXELFORMATDESCRIPTOR),	
+		1,								
+		PFD_DRAW_TO_WINDOW |			
+		PFD_SUPPORT_OPENGL |			
+		PFD_DOUBLEBUFFER,				
+		PFD_TYPE_RGBA,					
+		32,								
+		0, 0, 0, 0, 0, 0,				
+		0,								
+		0,								
+		0,								
+		0, 0, 0, 0,						
+		16,								
+		0,								
+		0,								
+		PFD_MAIN_PLANE,					
+		0,								
+		0, 0, 0 };						
+
+	nPixelFormat = ChoosePixelFormat(hDC, &pfd);	
+
+	SetPixelFormat(hDC, nPixelFormat, &pfd);		
+}
 
 
-//prosedur controlnya disini ya
+LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	static HGLRC hRC;					
+	static HDC hDC;						
+	int width, height;					
+	int oldMouseX, oldMouseY;
 
-//=========================================
+	switch(message)
+	{
+		case WM_CREATE:					
+
+			hDC = GetDC(hwnd);			
+			g_HDC = hDC;
+			SetupPixelFormat(hDC);		
+
+			
+			hRC = wglCreateContext(hDC);
+			wglMakeCurrent(hDC, hRC);
+
+			return 0;
+			break;
+
+		case WM_CLOSE:					
+
+			
+			wglMakeCurrent(hDC, NULL);
+			wglDeleteContext(hRC);
+
+			
+			PostQuitMessage(0);
+
+			return 0;
+			break;
+
+		case WM_SIZE:
+			height = HIWORD(lParam);		
+			width = LOWORD(lParam);
+
+			if (height==0)					
+			{
+				height=1;					
+			}
+
+			glViewport(0, 0, width, height);	
+			glMatrixMode(GL_PROJECTION);		
+			glLoadIdentity();					
+
+			
+			gluPerspective(54.0f,(GLfloat)width/(GLfloat)height,1.0f,1000.0f);
+
+			glMatrixMode(GL_MODELVIEW);			
+			glLoadIdentity();					
+
+			return 0;
+			break;
+
+		case WM_KEYDOWN:					
+			keyPressed[wParam] = true;
+			return 0;
+			break;
+
+		case WM_KEYUP:
+			keyPressed[wParam] = false;
+			return 0;
+			break;
+
+		case WM_MOUSEMOVE:
+			
+			oldMouseX = mouseX;
+			oldMouseY = mouseY;
+
+			
+			mouseX = LOWORD(lParam);
+			mouseY = HIWORD(lParam);
+
+			
+			if (mouseY < 200)
+				mouseY = 200;
+			if (mouseY > 450)
+				mouseY = 450;
+
+			if ((mouseX - oldMouseX) > 0)		
+				angle += 3.0f;
+			else if ((mouseX - oldMouseX) < 0)	
+				angle -= 3.0f;
+
+			return 0;
+			break;
+		default:
+			break;
+	}
+
+	return (DefWindowProc(hwnd, message, wParam, lParam));
+}
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
