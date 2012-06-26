@@ -124,9 +124,64 @@ void InitializeTerrain()
 	}
 }
 
-//permukaan warna disini cuy
 
-//=========================
+bool LoadTextures()
+{
+	
+	landTexture = LoadBitmapFile("green.bmp", &landInfo);
+	if (!landTexture)
+		return false;
+
+	
+	waterTexture = LoadBitmapFile("water.bmp", &waterInfo);
+	if (!waterTexture)
+		return false;
+
+	
+	glGenTextures(1, &land);                  
+	glBindTexture(GL_TEXTURE_2D, land);       
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, landInfo.biWidth, landInfo.biHeight, GL_RGB, GL_UNSIGNED_BYTE, landTexture);
+
+	
+	glGenTextures(1, &water);
+	glBindTexture(GL_TEXTURE_2D, water);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, waterInfo.biWidth, waterInfo.biHeight, GL_RGB, GL_UNSIGNED_BYTE, waterTexture);
+
+	return true;
+}
+
+void CleanUp()
+{
+	free(imageData);
+	free(landTexture);
+	free(waterTexture);
+}
+
+
+void Initialize()
+{
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);		
+
+	glShadeModel(GL_SMOOTH);					
+	glEnable(GL_DEPTH_TEST);					
+	glEnable(GL_CULL_FACE);						
+	glFrontFace(GL_CCW);						
+
+	glEnable(GL_TEXTURE_2D);					
+
+	imageData = LoadBitmapFile("terrain2.bmp", &bitmapInfoHeader);
+
+	
+	InitializeTerrain();
+	LoadTextures();
+}
+
 
 
 
